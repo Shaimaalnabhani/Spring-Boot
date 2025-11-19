@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Course Management System</title>
+<style>
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:#eef2f7; margin:0; padding:0; }
+header { background:#4CAF50; color:white; text-align:center; padding:25px 0; box-shadow: 0 4px 6px rgba(0,0,0,0.1);}
+.container { max-width:900px; margin:30px auto; background:white; padding:25px; border-radius:15px; box-shadow:0 5px 15px rgba(0,0,0,0.1);}
+h2 { color:#333; margin-top:30px; }
+input { padding:12px; margin:8px 5px 15px 0; border-radius:8px; border:1px solid #ccc; width:calc(30% - 10px);}
+button { padding:12px 20px; margin-top:5px; border:none; border-radius:8px; color:white; font-weight:bold; cursor:pointer; transition:0.3s; }
+button:hover { opacity:0.85; }
+.create-btn { background:#4CAF50; }
+.update-btn { background:#2196F3; }
+.delete-btn { background:#f44336; }
+.get-btn { background:#ff9800; }
+.refresh-btn { background:#9c27b0; }
+table { width:100%; border-collapse:collapse; margin-top:20px; border-radius:8px; overflow:hidden;}
+th, td { padding:12px; text-align:left; border-bottom:1px solid #ddd; }
+th { background:#f4f4f4; }
+tr:hover { background:#f1f1f1; cursor:pointer; }
+#selectedCard { background:#f9f9f9; padding:15px; border-radius:12px; margin-top:15px; box-shadow:0 3px 8px rgba(0,0,0,0.1); }
+#selectedCard strong { color:#555; }
+</style>
+</head>
+<body>
+
+<header><h1>🌟 Course Management System</h1></header>
+
+<div class="container">
+
+<h2>Create Course</h2>
+<input type="text" id="createName" placeholder="Course Name">
+<input type="text" id="createInstructor" placeholder="Instructor Name">
+<input type="number" id="createCredit" placeholder="Credit Hours">
+<button class="create-btn" onclick="createCourse()">Create Course</button>
+
+<h2>Get Course By ID</h2>
+<input type="number" id="getId" placeholder="Enter Course ID">
+<button class="get-btn" onclick="getCourseById()">Search</button>
+<div id="selectedCard">No course selected.</div>
+
+<h2>Update Course</h2>
+<input type="number" id="updateId" placeholder="Course ID to update">
+<input type="text" id="updateName" placeholder="New Name">
+<input type="text" id="updateInstructor" placeholder="New Instructor">
+<input type="number" id="updateCredit" placeholder="New Credit Hours">
+<button class="update-btn" onclick="updateCourse()">Update Course</button>
+
+<h2>Delete Course</h2>
+<input type="number" id="deleteId" placeholder="Course ID to delete">
+<button class="delete-btn" onclick="deleteCourse()">Delete Course</button>
+
+<h2>All Courses</h2>
+<button class="refresh-btn" onclick="getAllCourses()">Refresh Courses</button>
+<table>
+<thead>
+<tr><th>ID</th><th>Name</th><th>Instructor</th><th>Credit Hours</th></tr>
+</thead>
+<tbody id="courseTable"></tbody>
+</table>
+
+</div>
+
+<script>
+const baseUrl = 'http://localhost:8080';
+
+// --- Create Course ---
+function createCourse() {
+    const name = document.getElementById('createName').value;
+    const instructor = document.getElementById('createInstructor').value;
+    const credit = document.getElementById('createCredit').value;
+    if(!name || !instructor || !credit) return alert("Fill all fields!");
+
+    fetch(`${baseUrl}/courses`, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({name, instructorName: instructor, creditHours: parseInt(credit)})
+    })
+    .then(res=>res.text())
+    .then(msg=>{
+        alert(msg);
+        document.getElementById('createName').value='';
+        document.getElementById('createInstructor').value='';
+        document.getElementById('createCredit').value='';
+        getAllCourses();
+    });
+}
+
+// --- Get Course by ID ---
+function getCourseById() {
+    const id = document.getElementById('getId').value;
+    if(!id) return alert("Enter ID!");
+    fetch(`${baseUrl}/courses/${id}`)
+    .then(res=>res.json())
+    .then(course=>{
+        if(course.id && course.id>0){
+            document.getElementById('selectedCard').innerHTML=`
+                <strong>ID:</strong> ${course.id}<br>
+                <strong>Name:</strong> ${course.name}<br>
+                <strong>Instructor:</strong> ${course.instructorName}<br>
+                <strong>Credit Hours:</strong> ${course.creditHours}
+            `;
+        } else {
+            document.getElementById('selectedCard').innerHTML='Course not found.';
+        }
+    });
+}
+
+// --- Update Course ---
+function updateCourse() {
+    const id = document.getElementById('updateId').value;
+    if(!id) return alert("Enter Course ID to update!");
+    const name = document.getElementById('updateName').value;
+    const instructor = document.getElementById('updateInstructor').value;
+    const credit = document.getElementById('updateCredit').value;
+
+    fetch(`${baseUrl}/update`, {
+        method:'PUT',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+            id: parseInt(id),
+            name: name,
+            instructorName: instructor,
+            creditHours: parseInt(credit)
+        })
+    })
+    .then(res=>res.text())
+    .then(msg=>{
+        alert(msg);
+        document.getElementById('updateId').value='';
+        document.getElementById('updateName').value='';
+        document.getElementById('updateInstructor').value='';
+        document.getElementById('updateCredit').value='';
+        getAllCourses();
+    });
+}
+
+// --- Delete Course ---
+function deleteCourse() {
+    const id = document.getElementById('deleteId').value;
+    if(!id) return alert("Enter Course ID to delete!");
+    fetch(`${baseUrl}/courses/${id}`, {method:'DELETE'})
+    .then(res=>res.text())
+    .then(msg=>{
+        alert(msg);
+        document.getElementById('deleteId').value='';
+        getAllCourses();
+    });
+}
+
+// --- Get All Courses ---
+function getAllCourses() {
+    fetch(`${baseUrl}/courses`)
+    .then(res=>res.json())
+    .then(data=>{
+        const table = document.getElementById('courseTable');
+        table.innerHTML='';
+        data.forEach(course=>{
+            const row = document.createElement('tr');
+            row.innerHTML=`<td>${course.id}</td><td>${course.name}</td><td>${course.instructorName}</td><td>${course.creditHours}</td>`;
+            table.appendChild(row);
+        });
+    });
+}
+
+// --- Load All Courses on Page Load ---
+document.addEventListener('DOMContentLoaded', getAllCourses);
+</script>
+
+</body>
+</html>
