@@ -20,8 +20,10 @@ public class MarkCreateRequest {
 
     public static Mark convertToMark(MarkCreateRequest request) {
         Mark mark = new Mark();
-        mark.setStudentName(request.getStudentName());
-        mark.setScore(request.getScore());
+        if (request!=null) {
+            mark.setStudentName(request.getStudentName());
+            mark.setScore(request.getScore());
+        }
         return mark;
     }
 

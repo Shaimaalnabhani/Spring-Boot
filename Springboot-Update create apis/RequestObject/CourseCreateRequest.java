@@ -21,16 +21,17 @@ public class CourseCreateRequest {
     private int creditHours;
     private Integer instructorId;
     private Integer departmentId;
-    private List<Mark> marks;
+    private List<MarkCreateRequest> marks;
 
 
-    public static Course convertToCourse(CourseCreateRequest request){
+    public static Course convertToCourse(CourseCreateRequest request) {
         Course course = new Course();
-        course.setName(request.getName());
-        course.setCreditHours(request.getCreditHours());
-       return course;
+        if (request != null) {
+            course.setName(request.getName());
+            course.setCreditHours(request.getCreditHours());
+        }
+        return course;
     }
-
     public static void validCreateCourseRequest(CourseCreateRequest request ) throws Exception {
         if (HelperUtils.isNull(request.getName()) || request.getName().isBlank() || request.getName().isEmpty()) {
             throw new Exception(Constants.COURSE_CREATE_REQUEST_NAME_NOT_VALID);

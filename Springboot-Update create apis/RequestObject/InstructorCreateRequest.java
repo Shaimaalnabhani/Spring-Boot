@@ -23,9 +23,11 @@ public class InstructorCreateRequest {
 
     public static Instructor convertToInstructor(InstructorCreateRequest request) {
         Instructor instructor = new Instructor();
-        instructor.setName(request.getName());
-        instructor.setEmail(request.getEmail());
-        instructor.setSpecialization(request.getSpecialization());
+        if (request!=null) {
+            instructor.setName(request.getName());
+            instructor.setEmail(request.getEmail());
+            instructor.setSpecialization(request.getSpecialization());
+        }
         return instructor;
     }
 

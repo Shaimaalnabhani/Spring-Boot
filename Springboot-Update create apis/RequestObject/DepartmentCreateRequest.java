@@ -21,6 +21,7 @@ public class DepartmentCreateRequest {
 
     public static Department convertToDepartment(DepartmentCreateRequest request) {
         Department department = new Department();
+        if (request!=null)
         department.setName(request.getName());
         department.setDescription(request.getDescription());
         return department;
